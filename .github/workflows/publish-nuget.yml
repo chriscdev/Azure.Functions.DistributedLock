@@ -46,9 +46,10 @@ jobs:
       # Push the package
       - name: NuGet push
         run: |
-          # Use the glob pattern from your previous working steps to find the package.
-          # We use the temporary API key provided by the 'login' action.
+          # Use the V3 PUSH Service URL directly to bypass fallback logic.
+          V3_PUSH_URL="https://www.nuget.org/api/v3/package"
+          
           dotnet nuget push **/bin/Release/*.nupkg \
             --api-key ${{steps.login.outputs.NUGET_API_KEY}} \
-            --source https://api.nuget.org/v3/index.json \
+            --source "$V3_PUSH_URL" \
             --skip-duplicate
