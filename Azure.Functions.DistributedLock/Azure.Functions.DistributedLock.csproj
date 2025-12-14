@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     
     <!-- NuGet package metadata -->
-    <PackageId>Azure.Functions.DistributedLock</PackageId>
+    <PackageId>Escapement.Azure.Functions.DistributedLock</PackageId>
     <Version>0.1.0</Version>
     <Authors>chriscdev</Authors>
     <Company>chriscdev</Company>
