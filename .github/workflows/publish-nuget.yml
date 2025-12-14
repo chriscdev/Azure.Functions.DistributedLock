@@ -35,11 +35,20 @@ jobs:
           VERSION=${VERSION#v}
           dotnet pack Azure.Functions.DistributedLock/Azure.Functions.DistributedLock.csproj --configuration Release --no-build -p:PackageVersion=$VERSION
           
-      # 3. UPDATED STEP: Push using OIDC token (no separate API key required)
-      - name: Push to NuGet (Trusted Publishing - Final Attempt)
-        # The local NuGet.Config now guarantees the V3 source is used.
+      # 3. STEP: Push using OIDC token
+      # Get a short-lived NuGet API key
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }} # Your NuGet.org username
+    
+      # Push the package
+      - name: NuGet push
         run: |
+          # Use the glob pattern from your previous working steps to find the package.
+          # We use the temporary API key provided by the 'login' action.
           dotnet nuget push **/bin/Release/*.nupkg \
-            --source "nuget.org" \
-            --api-key "gh" \
+            --api-key ${{steps.login.outputs.NUGET_API_KEY}} \
+            --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
