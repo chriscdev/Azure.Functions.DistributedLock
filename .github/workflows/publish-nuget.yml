@@ -45,11 +45,4 @@ jobs:
     
       # Push the package
       - name: NuGet push
-        run: |
-          # Use the V3 PUSH Service URL, ensuring the critical trailing slash.
-          V3_PUSH_URL="https://www.nuget.org/api/v3/package/"
-          
-          dotnet nuget push **/bin/Release/*.nupkg \
-            --api-key ${{steps.login.outputs.NUGET_API_KEY}} \
-            --source "$V3_PUSH_URL" \
-            --skip-duplicate
+        run: dotnet nuget push artifacts/Azure.Functions.DistributedLock.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
