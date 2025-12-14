@@ -1,30 +1,48 @@
 name: Publish NuGet
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  release:
+    types: [published]
+
+# 1. ADD Permissions block to request the id-token
+permissions:
+  contents: read # Default needed for actions/checkout
+  id-token: write # This is essential to retrieve the OIDC token
 
 jobs:
   publish:
+    if: ${{ github.event.release.prerelease == false }} 
     runs-on: ubuntu-latest
+    
+    # 2. Add environment to meet your trusted publishing policy
+    environment: production 
+    
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
+          
       - name: Restore
         run: dotnet restore
+        
       - name: Build
         run: dotnet build --configuration Release --no-restore
+        
       - name: Pack
         run: |
-          VERSION=${{ github.ref_name }}
-          # Remove leading 'v' if present
+          VERSION=${{ github.event.release.tag_name }} 
           VERSION=${VERSION#v}
           dotnet pack Azure.Functions.DistributedLock/Azure.Functions.DistributedLock.csproj --configuration Release --no-build -p:PackageVersion=$VERSION
-      - name: Push to NuGet
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          
+      # 3. UPDATED STEP: Push using OIDC token (no separate API key required)
+      - name: Push to NuGet (Trusted Publishing)
+        # No 'env' block for NUGET_API_KEY is needed now!
         run: |
-          dotnet nuget push **/bin/Release/*.nupkg -k "$NUGET_API_KEY" -s https://api.nuget.org/v3/index.json --skip-duplicate
+          # Use the 'dotnet nuget push' command with the Trusted Publishing parameters.
+          # The NuGet client automatically uses the OIDC token provided by GitHub.
+          # The --api-key is set to 'gh' to signal the use of the OIDC token.
+          dotnet nuget push **/bin/Release/*.nupkg \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key "gh" \
+            --skip-duplicate
