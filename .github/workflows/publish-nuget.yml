@@ -33,7 +33,7 @@ jobs:
         run: |
           VERSION=${{ github.event.release.tag_name }} 
           VERSION=${VERSION#v}
-          dotnet pack Azure.Functions.DistributedLock/Azure.Functions.DistributedLock.csproj --configuration Release --no-build -p:PackageVersion=$VERSION -o artifacts
+          dotnet pack Escapement.Azure.Functions.DistributedLock/Escapement.Azure.Functions.DistributedLock.csproj --configuration Release --no-build -p:PackageVersion=$VERSION -o artifacts
           
       # 3. STEP: Push using OIDC token
       # Get a short-lived NuGet API key
