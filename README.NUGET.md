@@ -5,6 +5,7 @@ A small library to provide distributed locking for Azure Functions (Isolated Wor
 Package: `Escapement.Azure.Functions.DistributedLock`
 
 Summary
+- Declarative locking via `[Singleton("key-{id}")]` attribute for in-place migration from in-process to isolated Functions worker model.
 - Declarative locking via `[DistributedLock("key-{id}")]` attribute.
 - Programmatic locking via `IDistributedLockHandlerFactory` and `IDistributedLockHandler`.
 - Uses Azure Blob leases with automatic background renewal and safe release.
@@ -13,7 +14,7 @@ Summary
 Install
 
 ```bash
-dotnet add package Azure.Functions.DistributedLock
+dotnet add package Escapement.Azure.Functions.DistributedLock
 ```
 
 Quick start
@@ -29,6 +30,17 @@ services.AddSingleton<IDistributedLockHandlerFactory, BlobLeaseHandlerFactory>()
 ```
 
 2) Declarative usage (attribute on function):
+
+```csharp
+[Singleton("ProcessOrder")]
+[DistributedLock("order-lock-{orderId}")]
+public async Task Run(string orderId, ILogger log)
+{
+    // If this runs, the lock was acquired and is being renewed.
+}
+```
+
+or
 
 ```csharp
 [Function("ProcessOrder")]
